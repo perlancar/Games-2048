@@ -180,7 +180,7 @@ sub draw_sub_score {
 sub tile_color {
 	my ($self, $value) = @_;
         if ($ENV{KONSOLE_DBUS_SERVICE}) {
-		!defined $value    ? ansibg("776E65") . ansibg("CCC0B3")
+		!defined $value    ? ansifg("776E65") . ansibg("CCC0B3")
 		: $value < 4       ? ansifg("776E65") . ansibg("EEE4DA")
 		: $value < 8       ? ansifg("776E65") . ansibg("EDE0C8")
 		: $value < 16      ? ansifg("F9F6F2") . ansibg("F2B179")
