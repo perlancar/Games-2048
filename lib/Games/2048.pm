@@ -31,14 +31,11 @@ See L<http://dev.perl.org/licenses/> for more information.
 =cut
 
 package Games::2048;
-use 5.01;
+use 5.012;
 use Moo;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
-use Storable;
-use File::ShareDir;
-use File::Spec::Functions;
 use Time::HiRes;
 
 use constant {
@@ -64,12 +61,9 @@ sub run {
 	my $first_time = 1;
 
 	while (!$quit) {
-		if ($first_time) {
-			$game = $self->restore_game;
-			if ($game) {
-				$self->best_score($game->best_score);
-				undef $game if $game->lose;
-			}
+		if ($first_time and $game = Games::2048::Game->restore) {
+			$self->update_best_score($game);
+			undef $game if $game->lose or !$game->is_valid;
 		}
 		else {
 			undef $game;
@@ -100,7 +94,7 @@ sub run {
 					if ($vec) {
 						$game->move($vec);
 					}
-					elsif ($key =~ /^[q\cC]$/i) {
+					elsif ($key =~ /^[q]$/i) {
 						$quit = 1;
 						last PLAY;
 					}
@@ -128,20 +122,19 @@ sub run {
 		}
 
 		$game->draw_win;
-
-		$self->best_score($game->best_score) if $game->best_score > $self->best_score;
+		$self->update_best_score($game);
 
 		if (!$quit and !$restart) {
 			print $game->win ? "Keep going?" : "Try again?", " (Y/n) ";
 			{
 				my $key = Games::2048::Input::poll_key;
-				if ($key =~ /^[yn ]$/i) {
+				if ($key =~ /^[yn]$/i) {
 					print $key;
 				}
-				if ($key =~ /^[nq\cC]$/i) {
+				if ($key =~ /^[nq]$/i) {
 					$quit = 1;
 				}
-				elsif ($key =~ /^[yr\r\n ]$/i) {
+				elsif ($key =~ /^[yr\n]$/i) {
 					say "";
 				}
 				else {
@@ -157,24 +150,17 @@ sub run {
 		}
 	}
 
-	$self->save_game($game);
+	$game->save;
 }
 
-sub save_game {
+sub update_best_score {
 	my ($self, $game) = @_;
-	eval { store($game, $self->game_file); 1 };
-}
-
-sub restore_game {
-	my $self = shift;
-	my $game = eval { retrieve $self->game_file };
-}
-
-sub game_file {
-	my $self = shift;
-	my $dir = eval { File::ShareDir::dist_dir("Games-2048") };
-	return if !defined $dir;
-	return catfile $dir, "game.dat";
+	if (defined $game->best_score and $game->best_score > $self->best_score) {
+		$self->best_score($game->best_score);
+	}
+	else {
+		$game->best_score($self->best_score);
+	}
 }
 
 1;

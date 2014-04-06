@@ -1,4 +1,4 @@
-use 5.01;
+use 5.012;
 use strict;
 use warnings;
 use inc::Module::Install;
@@ -7,7 +7,7 @@ name     'Games-2048';
 all_from 'lib/Games/2048.pm';
 license  'perl';
 
-perl_version 5.01;
+perl_version 5.012;
 
 resources (
 	# homepage   => 'http://yourwebsitehere.com',
@@ -33,12 +33,12 @@ test_requires (
 );
 
 requires (
-	'Term::ReadKey'  => 2.30,
+	'Term::ReadKey'  => 2.31,
 	'Moo'            => 1.004,
 	'strictures'     => 1.005,
 	'File::ShareDir' => 1.00,
 	('Win32::Console::ANSI' => 1.07) x ($^O eq 'MSWin32'),
-	'Color::ANSI::Util' => 0,
+	'Color::ANSI::Util' => 0.03,
 );
 
 install_script (
@@ -46,5 +46,4 @@ install_script (
 );
 
 install_as_cpan;
-auto_install;
 WriteAll;
